@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Send Emails - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mt-5">Send Emails</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Compose Email</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('emails_page') }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.event_id.label(class="form-label") }}
+                        {{ form.event_id(class="form-select") }}
+                        {% for error in form.event_id.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.subject.label(class="form-label") }}
+                        {{ form.subject(class="form-control") }}
+                        {% for error in form.subject.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.body.label(class="form-label") }}
+                        {{ form.body(class="form-control", rows=10) }}
+                        {% for error in form.body.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {{ form.send_emails(class="btn btn-primary") }}
+                    {{ form.send_test(class="btn btn-secondary") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

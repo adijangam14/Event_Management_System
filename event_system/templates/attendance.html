@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Attendance - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mt-5">Manage Attendance</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Select Event</h4>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('attendance_page') }}">
+                    <div class="mb-3">
+                        <label for="event_id" class="form-label">Event</label>
+                        <select class="form-select" id="event_id" name="event_id" onchange="this.form.submit()">
+                            <option value="">Select an event</option>
+                            {% for event in events %}
+                            <option value="{{ event[0] }}" {% if event[0] == selected_event_id %}selected{% endif %}>{{ event[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% if selected_event_id %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Attendance List</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search for students...">
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable">
+                        {% for student in attendance_list %}
+                        <tr>
+                            <td>{{ student[0] }}</td>
+                            <td>{{ student[1] }}</td>
+                            <td>{{ student[2] }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('attendance_page') }}" class="d-inline">
+                                    {{ form.hidden_tag() }}
+                                    <input type="hidden" name="event_id" value="{{ selected_event_id }}">
+                                    <input type="hidden" name="student_id" value="{{ student[0] }}">
+                                    <input type="hidden" name="status" value="Y">
+                                    <button type="submit" name="action" value="present" class="btn btn-success btn-sm">Present</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('attendance_page') }}" class="d-inline">
+                                    {{ form.hidden_tag() }}
+                                    <input type="hidden" name="event_id" value="{{ selected_event_id }}">
+                                    <input type="hidden" name="student_id" value="{{ student[0] }}">
+                                    <input type="hidden" name="status" value="N">
+                                    <button type="submit" name="action" value="absent" class="btn btn-danger btn-sm">Absent</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.getElementById("searchInput").addEventListener("keyup", function() {
+    let filter = this.value.toUpperCase();
+    let table = document.getElementById("studentTable");
+    let tr = table.getElementsByTagName("tr");
+
+    for (let i = 0; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName("td")[1]; // Column with student name
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
