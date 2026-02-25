@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Events - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mt-5">Manage Events</h1>
+    </div>
+</div>
+{% if role == 'admin' %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Create New Event</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('events_page') }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.event_name.label(class="form-label") }}
+                            {{ form.event_name(class="form-control") }}
+                            {% for error in form.event_name.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.event_date.label(class="form-label") }}
+                            {{ form.event_date(class="form-control") }}
+                            {% for error in form.event_date.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.event_time.label(class="form-label") }}
+                            {{ form.event_time(class="form-control") }}
+                            {% for error in form.event_time.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.venue.label(class="form-label") }}
+                            {{ form.venue(class="form-control") }}
+                            {% for error in form.venue.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.total_slots.label(class="form-label") }}
+                        {{ form.total_slots(class="form-control") }}
+                        {% for error in form.total_slots.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {{ form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>All Events</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Venue</th>
+                            <th>Slots</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td>{{ event[0] }}</td>
+                            <td>{{ event[1] }}</td>
+                            <td>{{ event[2].strftime('%Y-%m-%d') }}</td>
+                            <td>{{ event[3] }}</td>
+                            <td>{{ event[4] }}</td>
+                            <td>{{ event[5] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

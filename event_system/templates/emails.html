@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Send Emails - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mt-5">Send Emails</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Compose Email</h4>
+            </div>
+            <div class="card-body">
+                <form id="email-form" method="POST" action="{{ url_for('emails_page') }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.event_id.label(class="form-label") }}
+                            {{ form.event_id(class="form-select", id="event-select") }}
+                            {% for error in form.event_id.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.template.label(class="form-label") }}
+                            {{ form.template(class="form-select", id="template-select") }}
+                            {% for error in form.template.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.subject.label(class="form-label") }}
+                        {{ form.subject(class="form-control", id="email-subject") }}
+                        {% for error in form.subject.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.body.label(class="form-label") }}
+                        {{ form.body(class="form-control", rows=10, id="email-body") }}
+                        {% for error in form.body.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {{ form.send_emails(class="btn btn-primary", id="btn-send") }}
+                    {{ form.send_test(class="btn btn-secondary", id="btn-test") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const eventSelect = document.getElementById('event-select');
+    const templateSelect = document.getElementById('template-select');
+    const emailSubject = document.getElementById('email-subject');
+    const emailBody = document.getElementById('email-body');
+    const emailForm = document.getElementById('email-form');
+    const btnSend = document.getElementById('btn-send');
+    const btnTest = document.getElementById('btn-test');
+
+    const templates = {
+        'invitation': {
+            'subject': 'Invitation: {event_name}',
+            'body': `Dear Attendee,
+
+We are excited to invite you to our upcoming event: {event_name}!
+
+Event Details:
+------------------------------------------
+📅 Date: {event_date}
+⏰ Time: {event_time}
+📍 Venue: {venue}
+------------------------------------------
+
+We have planned an engaging session and would love to have you join us. Please ensure you arrive at least 15 minutes before the start time for check-in.
+
+If you have any questions or require further information, please don't hesitate to reach out.
+
+We look forward to seeing you there!
+
+Best regards,
+The Event Management Team`
+        },
+        'reminder': {
+            'subject': 'Reminder: {event_name} - Coming Up Soon!',
+            'body': `Dear Attendee,
+
+This is a friendly reminder for the upcoming event: {event_name}.
+
+Event Details:
+------------------------------------------
+📅 Date: {event_date}
+⏰ Time: {event_time}
+📍 Venue: {venue}
+------------------------------------------
+
+We are looking forward to your participation. If for any reason you are unable to attend, please let us know so we can reallocate your slot.
+
+See you soon!
+
+Best regards,
+The Event Management Team`
+        },
+        'thank_you': {
+            'subject': 'Thank You for Attending: {event_name}',
+            'body': `Dear Attendee,
+
+Thank you for participating in our event: {event_name}!
+
+We hope you found the session informative and engaging. Your presence contributed to making this event a success.
+
+We would appreciate any feedback you might have to help us improve future events.
+
+Thank you again, and we hope to see you at our next event!
+
+Best regards,
+The Event Management Team`
+        }
+    };
+
+    emailForm.addEventListener('submit', function() {
+        btnSend.disabled = true;
+        btnTest.disabled = true;
+        btnSend.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+    });
+
+    function updateTemplate() {
+        const eventId = eventSelect.value;
+        const templateKey = templateSelect.value;
+        
+        if (!eventId || !templateKey) return;
+
+        fetch(`/api/event_details/${eventId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) return;
+
+                let template = templates[templateKey];
+                let subject = template.subject
+                    .replace(/{event_name}/g, data.event_name);
+                
+                let body = template.body
+                    .replace(/{event_name}/g, data.event_name)
+                    .replace(/{event_date}/g, data.event_date)
+                    .replace(/{event_time}/g, data.event_time)
+                    .replace(/{venue}/g, data.venue);
+
+                emailSubject.value = subject;
+                emailBody.value = body;
+            })
+            .catch(error => console.error('Error fetching event details:', error));
+    }
+
+    eventSelect.addEventListener('change', updateTemplate);
+    templateSelect.addEventListener('change', updateTemplate);
+    
+    // Also trigger on load if a value is already selected (e.g., after validation error)
+    if (eventSelect.value && !emailBody.value.includes('The Event Management Team')) {
+        updateTemplate();
+    }
+});
+</script>
+{% endblock %}
